@@ -1,0 +1,551 @@
+{
+    "swagger": "2.0",
+    "info"    : {
+        "version"     : "1.0",
+        "title"       : "Typescript/MongoDB JWT User-ToDo API",
+        "description" : "Web application with user registration, JWT authentification, todo functionality",
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+          }
+    },
+    "basepath" : "/",
+    "tags"     : [
+        {
+            "name"        : "users",
+            "discription" : "API for users part"
+        },
+        {
+            "name"        : "todos",
+            "discription" : "API for todos part"
+        }
+    ],
+    "produces" : ["application/json", "text/plain"],
+    "paths"    : {
+        "/me" : {
+            "get" : {
+                "tags"      : ["users"],
+                "summary"   : "Returns login, email, _id and date of registration of the logged in user by auth headers",
+                "produces"  : ["application/json", "text/plain"],
+                "parameters" : [
+                    {
+                        "in"     : "header",
+                        "name"   : "Authorization",
+                        "type"   : "string",
+                        "schema" : {
+                            "$ref" : "#/definitions/HeaderToken"
+                        }
+                    },
+                    {
+                        "in"     : "header",
+                        "name"   : "Refresh",
+                        "type"   : "string",
+                        "schema" : {
+                            "$ref" : "#/definitions/HeaderToken"
+                        }
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "OK",
+                        "schema" : {
+                            "type" : "object",
+                            "properties" : {
+                                    "login" : {
+                                        "type"  : "string"
+                                    },
+                                    "email" : {
+                                        "type"  : "string"
+                                    },
+                                    "SignUpAt" : {
+                                        "type"  : "string"
+                                    },
+                                    "id" : {
+                                        "type"  : "string"
+                                    }                                    
+                                }
+                        }
+                    },
+                    "401" : {
+                        "description" : "You are not authorized!"
+                    },
+                    "500" : {
+                        "description" : "Server internal error"
+                    }
+                }
+            }
+        },
+        "/readToDos?page=1&pagesize=1&sort=name" : {
+            "get" : {
+                "tags"      : ["todos"],
+                "summary"   : "Adds a tag to a user's tag group",
+                "produces"  : ["application/json", "text/plain"],
+                "parameters" : [
+                    {
+                        "in"     : "header",
+                        "name"   : "Authorization",
+                        "required" : "true",
+                        "type"   : "string",
+                        "schema" : {
+                            "$ref" : "#/definitions/HeaderToken"
+                        }
+                    },
+                    {
+                        "in"     : "header",
+                        "name"   : "Refresh",
+                        "required" : "true",
+                        "type"   : "string",
+                        "schema" : {
+                            "$ref" : "#/definitions/HeaderToken"
+                        }
+                    },
+                    {
+                        "in"          : "query",
+                        "name"        : "pagesize",
+                        "type"        : "integer",
+                        "description" : "Quantity of todos in one page"
+                    },
+                    {
+                        "in"          : "query",
+                        "name"        : "page",
+                        "type"        : "integer",
+                        "description" : "Number of page"
+                    },
+                    {
+                        "in"          : "query",
+                        "name"        : "sort",
+                        "type"        : "string",
+                        "description" : "The name of the column by which the list will be sorted"
+                    },
+                    {
+                        "in" : "body",
+                        "description" : "Object with specific parameters for todos search (For regex use syntax: \"column_name\" : { \"$regex\" : \"regex expression without \" \/\/ \" \"}\")",
+                        "schema" : {
+                            "type" : "object",
+                            "description" : "There are can be more than one parameter",
+                            "properties" : {
+                                "column_name" : {
+                                    "type" : "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "OK",
+                        "schema" : {
+                            "type" : "object",
+                            "properties" : {
+                                "todos" : {
+                                    "type"  : "array",
+                                    "items" : {
+                                        "type" : "object",
+                                        "properties" : {
+                                            "name" : {
+                                                "type" : "string"
+                                            },
+                                            "createdAt" : {
+                                                "type" : "string"
+                                            },
+                                            "updatedAt" : {
+                                                "type" : "string"
+                                            }
+                                        }                                    
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401" : {
+                        "description" : "You are not authorized!"
+                    },
+                    "500" : {
+                        "description" : "Server internal error"
+                    }
+                }
+            }
+        },
+        "/createToDos" : {
+            "post" : {
+                "tags"      : ["todos"],
+                "summary"   : "Creates todos that was sent in request body",
+                "produces"  : ["application/json", "text/plain"],
+                "parameters" : [
+                    {
+                        "in"     : "header",
+                        "name"   : "Authorization",
+                        "required" : "true",
+                        "type"   : "string",
+                        "schema" : {
+                            "$ref" : "#/definitions/HeaderToken"
+                        }
+                    },
+                    {
+                        "in"     : "header",
+                        "name"   : "Refresh",
+                        "required" : "true",
+                        "type"   : "string",
+                        "schema" : {
+                            "$ref" : "#/definitions/HeaderToken"
+                        }
+                    },
+                    {
+                        "in" : "body",
+                        "description" : "Todos to be created",
+                        "required"    : "true",
+                        "schema" : {
+                            "type" : "object",
+                            "properties" : {
+                                "todos" : {
+                                    "type" : "array",
+                                    "items" : {
+                                        "type" : "object",
+                                        "properties" : {
+                                            "name" : {
+                                                "type" : "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "OK",
+                        "schema" : {
+                            "type" : "object",
+                            "properties" : {
+                                "tags" : {
+                                    "type"  : "array",
+                                    "items" : {
+                                        "type" : "object",
+                                        "properties" : {
+                                            "createdAt" : {
+                                                "type" : "string"
+                                            },
+                                            "_id" : {
+                                                "type" : "string"
+                                            },
+                                            "__v" : {
+                                                "type" : "string"
+                                            },
+                                            "name" : {
+                                                "type" : "string"
+                                            }
+                                        }                                    
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401" : {
+                        "description" : "You are not authorized!"
+                    },
+                    "500" : {
+                        "description" : "Server internal error"
+                    }
+                }
+            }
+        },
+        "/updateToDos" : {
+            "put" : {
+                "tags"      : ["todos"],
+                "summary"   : "Updates Todos by their _id's",
+                "produces"  : ["application/json", "text/plain"],
+                "parameters" : [
+                    {
+                        "in"     : "header",
+                        "name"   : "Authorization",
+                        "required" : "true",
+                        "type"   : "string",
+                        "schema" : {
+                            "$ref" : "#/definitions/HeaderToken"
+                        }
+                    },
+                    {
+                        "in"     : "header",
+                        "name"   : "Refresh",
+                        "required" : "true",
+                        "type"   : "string",
+                        "schema" : {
+                            "$ref" : "#/definitions/HeaderToken"
+                        }
+                    },
+                    {
+                        "in" : "body",
+                        "description" : "Todos to be updated",
+                        "required"    : "true",
+                        "schema" : {
+                            "type" : "object",
+                            "properties" : {
+                                "todos" : {
+                                    "type" : "array",
+                                    "required" : "true",
+                                    "items" : {
+                                        "type" : "object",
+                                        "properties" : {
+                                            "_id" : {
+                                                "type" : "string",
+                                                "description" : "_id of the todo's"
+                                            },
+                                            "name" : {
+                                                "type" : "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "OK",
+                        "schema" : {
+                            "type" : "string",
+                            "example" : "TodosUpdated"
+                        }
+                    },
+                    "401" : {
+                        "description" : "You are not authorized!"
+                    },
+                    "500" : {
+                        "description" : "Server internal error"
+                    }
+                }
+            }
+        },
+        "/deleteToDos" : {
+            "delete" : {
+                "tags"      : ["todos"],
+                "summary"   : "Deletes Todos by their _id's",
+                "produces"  : ["application/json", "text/plain"],
+                "parameters" : [
+                    {
+                        "in"     : "header",
+                        "name"   : "Authorization",
+                        "type"   : "string",
+                        "schema" : {
+                            "$ref" : "#/definitions/HeaderToken"
+                        }
+                    },
+                    {
+                        "in"     : "header",
+                        "name"   : "Refresh",
+                        "type"   : "string",
+                        "schema" : {
+                            "$ref" : "#/definitions/HeaderToken"
+                        }
+                    },
+                    {
+                        "in" : "body",
+                        "description" : "Todos to be deleted",
+                        "required"    : "true",
+                        "schema" : {
+                            "type" : "object",
+                            "properties" : {
+                                "todos" : {
+                                    "type" : "array",
+                                    "required" : "true",
+                                    "items" : {
+                                        "type" : "object",
+                                        "properties" : {
+                                            "_id" : {
+                                                "type" : "string",
+                                                "description" : "_id of the todo's creator"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "OK",
+                        "schema" : {
+                            "type" : "string",
+                            "example" : "TodosUpdated"
+                        }
+                    },
+                    "401" : {
+                        "description" : "You are not authorized!"
+                    },
+                    "500" : {
+                        "description" : "Server internal error"
+                    }
+                }
+            }
+        },
+        "/signup" : {
+            "post" : {
+                "tags"      : ["users"],
+                "summary"   : "Endpoint for registration of the new user",
+                "produces"  : ["application/json", "text/plain"],
+                "parameters" : [
+                    {
+                        "in" : "body",
+                        "description" : "User data for registration",
+                        "required"    : "true",
+                        "schema" : {
+                            "type" : "object",
+                            "properties" : {
+                                "login" : {
+                                    "required" : "true",
+                                    "type" : "string"
+                                },
+                                "email" : {
+                                    "type" : "string"
+                                },
+                                "password" : {
+                                    "required" : "true",
+                                    "type" : "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "OK",
+                        "headers" : {
+                            "Authorization" : {
+                                "schema" : {
+                                    "$ref" : "#/definitions/HeaderToken"
+                                }
+                            },
+                            "Refresh" : {
+                                "schema" : {
+                                    "$ref" : "#/definitions/HeaderToken"
+                                }
+                            }
+                        },
+                        "schema" : {
+                            "type" : "string"
+                        }
+                    },
+                    "500" : {
+                        "description" : "Server internal error"
+                    }
+                }
+            }
+        },
+        "/login" : {
+            "post" : {
+                "tags"      : ["users"],
+                "summary"   : "Adds a tag to a user's tag group",
+                "produces"  : ["application/json", "text/plain"],
+                "parameters" : [
+                    {
+                        "in" : "body",
+                        "description" : "User data for loggin in",
+                        "required"    : "true",
+                        "schema" : {
+                            "type" : "object",
+                            "properties" : {
+                                "login" : {
+                                    "required" : "true",
+                                    "type" : "string"
+                                },
+                                "password" : {
+                                    "required" : "true",
+                                    "type" : "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "OK",
+                        "headers" : {
+                            "Authorization" : {
+                                "schema" : {
+                                    "$ref" : "#/definitions/HeaderToken"
+                                }
+                            },
+                            "Refresh" : {
+                                "schema" : {
+                                    "$ref" : "#/definitions/HeaderToken"
+                                }
+                            }
+                        },
+                        "schema" : {
+                            "type" : "string",
+                            "example" : "You are logged in!"
+                        }
+                    },
+                    "400" : {
+                        "description" : "Sends if user data hadn't received",
+                        "example" : "No user data!"
+                    },
+                    "402" : {
+                        "description" : "Sends if user with requested login not found",
+                        "example" : "wrongLogin"
+                    },
+                    "403" : {
+                        "description" : "Sends if user with requested login not found",
+                        "example" : "wrongLogin"
+                    },
+                    "500" : {
+                        "description" : "Server internal error"
+                    }
+                }
+            }
+        },
+        "/logout" : {
+            "get" : {
+                "tags"      : ["users"],
+                "summary"   : "Signalizing about user log out",
+                "produces"  : ["application/json", "text/plain"],
+                "parameters" : [
+                    {
+                        "in"     : "header",
+                        "name"   : "Authorization",
+                        "type"   : "string",
+                        "schema" : {
+                            "$ref" : "#/definitions/HeaderToken"
+                        }
+                    },
+                    {
+                        "in"     : "header",
+                        "name"   : "Refresh",
+                        "type"   : "string",
+                        "schema" : {
+                            "$ref" : "#/definitions/HeaderToken"
+                        }
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description" : "OK",
+                        "schema" : {
+                            "type" : "string",
+                            "example" : "killAuthHeaders"
+                        }
+                    },
+                    "401" : {
+                        "description" : "You are not authorized!"
+                    },
+                    "500" : {
+                        "description" : "Server internal error"
+                    }
+                }
+            }
+        }
+    },
+    "definitions" : {
+        "HeaderToken" : {
+            "properties" : {
+                "token" : {
+                    "type" : "string",
+                    "example" : "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjUxZjlmNDEyLTM1NzQtNGFjNS04M2VmLTgxZjNmMmY4YjU1NSIsImlhdCI6MTY2NTQ4NDIzMywiZXhwIjoxNjY1NDg2MDMzfQ.hItTiUZjoBGCx2oK0aLKeWYQuTr1XGrX94_cyZsA-FA"
+                }
+            }
+        }
+    }
+}
